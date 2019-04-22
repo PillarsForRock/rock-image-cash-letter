@@ -232,7 +232,7 @@ namespace com.shepherdchurch.ImageCashLetter
                     // The full raw ON_US field (that typically contains the account number and check number)
                     case FIELD.ON_US:
                         {
-                            return GetCharacterFields( 13, 31 ).Trim();
+                            return GetCharacterFields( 13, 32 ).Trim();
                         }
 
                     // Routing Number
