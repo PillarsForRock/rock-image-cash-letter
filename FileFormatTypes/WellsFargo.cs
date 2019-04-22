@@ -36,6 +36,7 @@ namespace com.shepherdchurch.ImageCashLetter.FileFormatTypes
         #region Fields
 
         protected int _cashHeaderId = 1;
+        protected bool _creditDetailAdded = false;
 
         #endregion
 
@@ -168,6 +169,19 @@ namespace com.shepherdchurch.ImageCashLetter.FileFormatTypes
             return header;
         }
 
+        protected override List<X937.Record> GetBundleRecords( ExportOptions options )
+        {
+            var records = new List<X937.Record>();
+
+            _creditDetailAdded = false;
+            foreach ( var batch in options.Batches )
+            {
+                records.AddRange( GetBundleRecords( options, batch.Transactions.ToList() ) );
+            }
+
+            return records;
+        }
+
         protected override BundleHeader GetBundleHeader( ExportOptions options, int bundleIndex )
         {
             var header = base.GetBundleHeader( options, bundleIndex );
@@ -189,19 +203,24 @@ namespace com.shepherdchurch.ImageCashLetter.FileFormatTypes
         {
             var records = new List<X937.Record>();
 
-            var accountNumber = Rock.Security.Encryption.DecryptString( GetAttributeValue( options.FileFormat, "AccountNumber" ) );
-            var routingNumber = Rock.Security.Encryption.DecryptString( GetAttributeValue( options.FileFormat, "RoutingNumber" ) );
-
-            var creditDetail = new WellsFargoCreditDetail
+            // Only add the credit detail record once on the first bundle.
+            if ( !_creditDetailAdded )
             {
-                Amount = transactions.Sum( t => t.TotalAmount ),
-                CreditAccountNumber = accountNumber,
-                ProcessControl = "  6586",
-                PayorRoutingNumber = "500000377",
-                InstitutionItemSequenceNumber = GetNextItemSequenceNumber().ToString( "000000000000000" ),
-                SourceOfWorkCode = "3"
-            };
-            records.Add( creditDetail );
+                var accountNumber = Rock.Security.Encryption.DecryptString( GetAttributeValue( options.FileFormat, "AccountNumber" ) );
+                var routingNumber = Rock.Security.Encryption.DecryptString( GetAttributeValue( options.FileFormat, "RoutingNumber" ) );
+
+                var creditDetail = new WellsFargoCreditDetail
+                {
+                    Amount = options.Batches.SelectMany( b => b.Transactions ).Sum( t => t.TotalAmount ),
+                    CreditAccountNumber = accountNumber,
+                    ProcessControl = "  6586",
+                    PayorRoutingNumber = "500000377",
+                    InstitutionItemSequenceNumber = GetNextItemSequenceNumber().ToString( "000000000000000" ),
+                    SourceOfWorkCode = "3"
+                };
+                records.Add( creditDetail );
+                _creditDetailAdded = true;
+            }
 
             return records;
         }
