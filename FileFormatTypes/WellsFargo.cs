@@ -36,6 +36,7 @@ namespace com.shepherdchurch.ImageCashLetter.FileFormatTypes
         #region Fields
 
         protected int _cashHeaderId = 1;
+        protected int _bundleIndex = 0;
         protected bool _creditDetailAdded = false;
 
         #endregion
@@ -185,8 +186,12 @@ namespace com.shepherdchurch.ImageCashLetter.FileFormatTypes
         protected override BundleHeader GetBundleHeader( ExportOptions options, int bundleIndex )
         {
             var header = base.GetBundleHeader( options, bundleIndex );
+            header.SequenceNumber = ( _bundleIndex + 1 ).ToString();
             header.CycleNumber = "01";
             header.ClientInstitutionRoutingNumber = Rock.Security.Encryption.DecryptString( GetAttributeValue( options.FileFormat, "InstitutionRoutingNumber" ) );
+
+            _bundleIndex++;
+
             return header;
         }
 
