@@ -3,21 +3,20 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
+using BitMiracle.LibTiff.Classic;
+
 using Rock;
-//using Rock.Attribute;
 using Rock.Model;
 
 using X937;
 using X937.Attributes;
 using X937.Records;
-
-using BitMiracle.LibTiff.Classic;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 
 namespace com.shepherdchurch.ImageCashLetter.FileFormatTypes
 {
